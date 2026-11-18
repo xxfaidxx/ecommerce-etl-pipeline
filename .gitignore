@@ -1,0 +1,18 @@
+# Environment
+.env
+venv/
+__pycache__/
+.pytest_cache/
+
+# Logs
+logs/*.log
+
+# Data files
+data/raw/
+data/processed/
+
+# Python
+*.py[cod]
+
+# Raw dataset
+data/olist/
