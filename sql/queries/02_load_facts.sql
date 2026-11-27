@@ -1,42 +1,29 @@
-
-INSERT INTO warehouse.fact_order_items (
+INSERT INTO warehouse.fact_order_payments (
     order_id,
-    order_item_id,
+    payment_sequential,
     customer_key,
-    product_key,
-    seller_key,
-    order_date_key,
-    shipping_limit_date,
-    price,
-    freight_value
+    payment_type,
+    payment_installments,
+    payment_value,
+    is_zero_payment
 )
 SELECT
-    oi.order_id,
-    oi.order_item_id,
+    p.order_id,
+    p.payment_sequential,
     dc.customer_key,
-    dp.product_key,
-    ds.seller_key,
-    TO_CHAR(o.order_purchase_timestamp, 'YYYYMMDD')::INTEGER,
-    oi.shipping_limit_date,
-    oi.price,
-    oi.freight_value
-FROM staging.stg_order_items oi
+    p.payment_type,
+    p.payment_installments,
+    p.payment_value,
+    p.payment_value = 0
+FROM staging.stg_order_payments p
 INNER JOIN staging.stg_orders o
-    ON oi.order_id = o.order_id
+    ON p.order_id = o.order_id
 INNER JOIN warehouse.dim_customer dc
     ON o.customer_id = dc.customer_id
-INNER JOIN warehouse.dim_product dp
-    ON oi.product_id = dp.product_id
-INNER JOIN warehouse.dim_seller ds
-    ON oi.seller_id = ds.seller_id
-INNER JOIN warehouse.dim_date dd
-    ON o.order_purchase_timestamp::DATE = dd.full_date
-ON CONFLICT (order_id, order_item_id)
+ON CONFLICT (order_id, payment_sequential)
 DO UPDATE SET
     customer_key = EXCLUDED.customer_key,
-    product_key = EXCLUDED.product_key,
-    seller_key = EXCLUDED.seller_key,
-    order_date_key = EXCLUDED.order_date_key,
-    shipping_limit_date = EXCLUDED.shipping_limit_date,
-    price = EXCLUDED.price,
-    freight_value = EXCLUDED.freight_value;
+    payment_type = EXCLUDED.payment_type,
+    payment_installments = EXCLUDED.payment_installments,
+    payment_value = EXCLUDED.payment_value,
+    is_zero_payment = EXCLUDED.is_zero_payment;
